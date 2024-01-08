@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/output.css">
+    <link rel="stylesheet" href="../css/detail.css">
+</head>
+
+<body>
+    <!-- ヘッダー -->
+    <header class="text-center bg-gray-300 pt-4 pb-4">高度検索アプリ</header>
+
+    <main class="flex flex-wrap justify-center">
+        <!-- 既存データ表示領域 -->
+        <div class="flex flex-col">
+            <!-- 画像アップロード -->
+            <input type="file" id="figUL">
+
+            <!-- 選択画像表示 -->
+            <img src="" id="showSerectedFig">
+
+            <!-- 既アップロード画像表示 -->
+            <table id="figList">既存画像表示領域</table>
+
+
+        </div>
+
+
+        <!-- 検索領域 -->
+        <div class="flex flex-col">
+            <!-- 画像検索欄 -->
+            <input type="text" placeholder="文章検索">
+
+
+            <!-- 検索画像表示 -->
+            <table id="searchedFigList">検索後画像表示領域</table>
+
+        </div>
+
+    </main>
+
+    <!-- スクリプト -->
+    <script>
+        // 既存画像の読み込みと表示
+        $(function(){
+            $("#figUL").on("change", function(){
+                var file = this.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e){
+                    $("#showSerectedFig").attr("src", e.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // 画像データをDBへ保存
+
+        // 画像の削除（DB操作）
+
+        // 画像の検索
+
+        // 検索後の画像表示
+
+    </script>
+
+    <!-- フッター -->
+    <footer class="text-center bg-gray-300 pt-4 pb-4">製作：2023/01/xx yuuki</footer>
+
+
+</body>
+
+</html>
