@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/output.css">
+    <link rel="stylesheet" href="../css/detail.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+</head>
+</head>
+
+<body>
+    <!-- ヘッダー -->
+    <header class="text-center bg-gray-300 pt-4 pb-4">高度検索アプリ</header>
+
+    <main class="flex flex-wrap justify-center">
+        <!-- 既存データ表示領域 -->
+        <div class="flex flex-col">
+            <!-- 画像アップロード -->
+            <input type="file" id="figUL">
+            <button id="uploadButton">アップロード</button>
+
+
+            <!-- 選択画像表示 -->
+            <img src="" id="showSerectedFig">
+
+            <!-- 既アップロード画像表示 -->
+            <table id="figList">既存画像表示領域</table>
+
+
+        </div>
+
+
+        <!-- 検索領域 -->
+        <div class="flex flex-col">
+            <!-- 画像検索欄 -->
+            <input type="text" placeholder="文章検索">
+
+
+            <!-- 検索画像表示 -->
+            <table id="searchedFigList">検索後画像表示領域</table>
+
+        </div>
+
+    </main>
+
+    <!-- スクリプト -->
+
+
+    <!-- 画像データをDBへ保存 -->
+    <!-- FireBase SDK -->
+
+    <script type="module">
+        // Firebaseモジュールをインポート
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+        import { getStorage, ref, uploadBytes, listAll, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
+
+        // Firebaseの設定
+        const firebaseConfig = {
+            apiKey: "",
+            authDomain: "figanalysis.firebaseapp.com",
+            projectId: "figanalysis",
+            storageBucket: "figanalysis.appspot.com",
+            messagingSenderId: "1070757363058",
+            appId: "1:1070757363058:web:ba1ece89d92f70aa38b1eb"
+        };
+
+        // Firebaseを初期化
+        const app = firebase.initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+
+        // 画像をアップロードする関数
+        $(function () {
+            var selectedFile;
+
+            $("#figUL").on("change", function () {
+                selectedFile = this.files[0];
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $("#showSerectedFig").attr("src", e.target.result);
+                };
+                reader.readAsDataURL(selectedFile);
+            });
+
+            $("#uploadButton").on("click", function () {
+                if (selectedFile) {
+                    uploadImage(selectedFile);
+                }
+            });
+
+            function uploadImage(file) {
+                const storageRef = storage.ref('images/' + file.name);
+                const uploadTask = storageRef.put(file);
+
+                uploadTask.on('state_changed',
+                    function (snapshot) {
+                        // アップロード進行中の処理
+                    },
+                    function (error) {
+                        console.error('アップロード失敗:', error);
+                    },
+                    function () {
+                        uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                            console.log('ファイルはこちらで利用可能', downloadURL);
+                            // 画像リストに追加
+                            var img = $('<img>').attr("src", downloadURL);
+                            $('#figList').append(img);
+                        });
+                    }
+                );
+            }
+        });
+    </script>
+
+
+
+    <!-- // 画像の削除（DB操作） -->
+
+    <!-- // 画像の検索 -->
+
+    <!-- // 検索後の画像表示 -->
+
+
+
+
+    <!-- フッター -->
+    <footer class="text-center bg-gray-300 pt-4 pb-4">製作：2023/01/xx yuuki</footer>
+
+
+</body>
+
+</html>

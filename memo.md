@@ -12,3 +12,5 @@ reader.onload = function(e) ~
 .attr('src', e.target.result)
   srcをeの内容として設定
 
+API
+AIzaSyAW8WfRhJ7USxOYVCwBgN6HkuFt8CRJyjs

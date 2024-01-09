@@ -7,6 +7,9 @@
     <title>Document</title>
     <link rel="stylesheet" href="../css/output.css">
     <link rel="stylesheet" href="../css/detail.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+</head>
 </head>
 
 <body>
@@ -18,6 +21,8 @@
         <div class="flex flex-col">
             <!-- 画像アップロード -->
             <input type="file" id="figUL">
+            <button id="uploadButton">アップロード</button>
+
 
             <!-- 選択画像表示 -->
             <img src="" id="showSerectedFig">
@@ -44,26 +49,122 @@
 
     <!-- スクリプト -->
     <script>
-        // 既存画像の読み込みと表示
-        $(function(){
-            $("#figUL").on("change", function(){
-                var file = this.files[0];
-                var reader = new FileReader();
-                reader.onload = function(e){
-                    $("#showSerectedFig").attr("src", e.target.result);
-                };
-                reader.readAsDataURL(file);
-            });
+    // 画像と特徴生成ボタンを表示する関数
+    function displayImagesWithFeatureButton(images) {
+        // images: Firebaseから取得した画像URLの配列
+        const existingImagesDiv = document.getElementById('figList');
+        existingImagesDiv.innerHTML = ''; // 既存の内容をクリア
+
+        images.forEach(url => {
+            const imageContainer = document.createElement('div');
+            imageContainer.style.display = 'flex';
+            imageContainer.style.alignItems = 'center';
+            imageContainer.style.marginBottom = '10px';
+
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.width = '100px';
+            img.style.height = '100px';
+            img.style.marginRight = '10px';
+
+            const button = document.createElement('button');
+            button.innerText = '特徴生成';
+            button.onclick = () => generateFeatures(url);
+
+            imageContainer.appendChild(img);
+            imageContainer.appendChild(button);
+
+            existingImagesDiv.appendChild(imageContainer);
         });
+    }
 
-        // 画像データをDBへ保存
+        // 特徴生成ボタンクリック時の処理
+        function generateFeatures(imageUrl) {
+            fetch('/generate-features', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ imageUrl: imageUrl }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('searchedFigList').innerText = data.features;
+            });
+        }
 
-        // 画像の削除（DB操作）
+        // Firebaseから画像を取得して表示（既存のコードを利用）
+        // displayImagesWithFeatureButton([...画像URLの配列...]);
+    </script>
 
-        // 画像の検索
+    <!-- 画像データをDBへ保存 -->
+    
+    <!-- FireBase SDK -->
 
-        // 検索後の画像表示
+    <script type="module">
+        // Firebaseモジュールをインポート
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+        import { getStorage, ref, uploadBytes, listAll, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
 
+        // Firebaseの設定
+        const firebaseConfig = {
+            apiKey: "",
+            authDomain: "figanalysis.firebaseapp.com",
+            projectId: "figanalysis",
+            storageBucket: "figanalysis.appspot.com",
+            messagingSenderId: "1070757363058",
+            appId: "1:1070757363058:web:ba1ece89d92f70aa38b1eb"
+        };
+
+        // Firebaseを初期化
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+
+        // 画像をアップロードする関数
+        document.getElementById('uploadButton').addEventListener('click', function () {
+            // ファイル入力からファイルを取得
+            var file = document.getElementById('figUL').files[0];
+
+            // ファイルが選択されていることを確認
+            if (file) {
+                // Firebase Storageにアップロードするための参照を作成
+                var storageRef = ref(storage, 'images/' + file.name);
+
+                // ファイルをアップロード
+                uploadBytes(storageRef, file).then(function (snapshot) {
+                    console.log('Uploaded a file!');
+                });
+            } else {
+                console.log('No file selected!');
+            }
+        });
+        // 画像リストを取得して表示する関数
+        function displayImages() {
+            const imagesRef = ref(storage, 'images/');
+            listAll(imagesRef)
+                .then((res) => {
+                    const urls = []; // 画像URLを格納する配列
+                    res.items.forEach((imageRef) => {
+                        getDownloadURL(imageRef).then((url) => {
+                            // 画像を表示するためのHTML要素を作成
+                            const img = document.createElement('img');
+                            img.src = url;
+                            img.style.width = '100px';  // 画像のサイズは必要に応じて調整してください
+                            img.style.height = '100px';
+                            urls.push(url); // 配列にURLを追加
+
+                            // 既存画像表示領域に画像を追加
+                            document.getElementById('figList').appendChild(img);
+                        });
+                    });
+                    displayImagesWithFeatureButton(urls);
+                }).catch((error) => {
+                    console.log("Error getting images:", error);
+                });
+        }
+
+        // ページ読み込み時に画像を表示
+        window.onload = displayImages;
     </script>
 
     <!-- フッター -->
